@@ -32,12 +32,11 @@ class Factory:
         self.stream.put(pack)
 
     def kill(self):
-        self.pool.close()
-        self.pool.join()
-        with self.stream.mutex:
-            self.stream.queue.clear()
         self.stop_flag = True
         self.runner.join()
+        self.pool.close()
+        self.pool.join()
+        self.stream.close()
 
 
 '''
@@ -61,4 +60,7 @@ if __name__ == '__main__':
         pack = Package()
         pack.special = {'x': random.randint(1, 10), 'y': random.randint(1, 10), 'z': random.randint(1, 10)}
         factory.add(pack)
+    factory.kill()
+    del factory, pack, x
+    pass
 '''
