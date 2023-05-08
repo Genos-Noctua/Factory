@@ -25,8 +25,8 @@ class Factory:
             self.pool.apply_async(self.tasks[pack.dst], args=(pack,), callback=self.export)
         
     def export(self, pack):
-        if pack.dst == -1: del pack
-        else: self.stream.put(pack)
+        if pack.dst != -1:
+            self.stream.put(pack)
 
     def add(self, pack):
         self.stream.put(pack)
