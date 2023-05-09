@@ -1,5 +1,5 @@
 import multiprocessing as mp
-import threading, random
+import threading
 
 class Package:
     def __init__(self):
@@ -56,6 +56,7 @@ class Factory:
 
 '''
 from factory import *
+import random
 
 def multiplier(package):
     for i in range(100000):
