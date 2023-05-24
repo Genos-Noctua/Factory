@@ -1,4 +1,4 @@
-#Factory 1.0
+#Factory 1.1
 import multiprocessing as mp
 import threading
 
@@ -15,8 +15,9 @@ class Factory:
         self.processes = processes
         self.stop_flag = False
         self.stream = mp.Queue(maxsize=pressure)
-        self.pack_pool = mp.Queue(maxsize=processes*2)
-        for x in range(processes*2):
+        self.drain = mp.Queue()
+        self.pack_pool = mp.Queue(100)
+        for x in range(100):
             self.pack_pool.put(Package())
         self.pool = mp.Pool(processes=self.processes)
         self.runner = threading.Thread(target=self.run, args = ())
@@ -29,9 +30,13 @@ class Factory:
             self.pool.apply_async(self.tasks[pack.dst], args=(pack,), callback=self.export)
         
     def export(self, pack):
-        if pack.dst != -1:
+        if pack.dst == -1:
+            self.drain.put(pack)
+            self.pack_pool.put(pack)
+        if pack.dst == -2:
+            self.pack_pool.put(pack)
+        else: 
             self.stream.put(pack)
-        else: self.ret_pack(pack)
 
     def add(self, pack):
         self.stream.put(pack)
@@ -43,15 +48,13 @@ class Factory:
         x.payload = {}
         return x 
 
-    def ret_pack(self, pack):
-        self.pack_pool.put(pack)
-
     def kill(self):
         self.stop_flag = True
         self.runner.join()
         self.pool.close()
         self.pool.join()
         self.stream.close()
+        self.drain.close()
         self.pack_pool.close()
 
 
