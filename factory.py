@@ -1,4 +1,4 @@
-#Factory 1.1
+#Factory 1.2
 import multiprocessing as mp
 import threading
 
@@ -16,7 +16,7 @@ class Factory:
         self.stop_flag = False
         self.stream = mp.Queue(maxsize=pressure)
         self.drain = mp.Queue()
-        self.pack_pool = mp.Queue(100)
+        self.pack_pool = mp.Queue(maxsize=100)
         for x in range(100):
             self.pack_pool.put(Package())
         self.pool = mp.Pool(processes=self.processes)
@@ -32,7 +32,6 @@ class Factory:
     def export(self, pack):
         if pack.dst == -1:
             self.drain.put(pack)
-            self.pack_pool.put(pack)
         if pack.dst == -2:
             self.pack_pool.put(pack)
         else: 
@@ -47,6 +46,9 @@ class Factory:
         x.special = {}
         x.payload = {}
         return x 
+
+    def ret_pack(self, pack):
+        self.pack_pool.put(pack)
 
     def kill(self):
         self.stop_flag = True
