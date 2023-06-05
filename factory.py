@@ -1,4 +1,4 @@
-#Factory 1.2
+#Factory 1.25
 import multiprocessing as mp
 import threading
 
@@ -9,7 +9,7 @@ class Package:
         self.payload = {}
 
 class Factory:
-    def __init__(self, tasks, pressure=100, processes=8):
+    def __init__(self, tasks, pressure=100, processes=mp.cpu_count()):
         self.tasks = tasks
         self.pressure = pressure
         self.processes = processes
