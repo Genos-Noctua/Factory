@@ -40,6 +40,9 @@ class Factory:
     def add(self, pack):
         self.stream.put(pack)
 
+    def take(self):
+        return self.drain.get()
+
     def get_pack(self):
         x = self.pack_pool.get()
         x.dst = 0
