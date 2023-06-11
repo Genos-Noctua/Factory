@@ -30,9 +30,9 @@ class Factory:
             self.pool.apply_async(self.tasks[pack.dst], args=(pack,), callback=self.export)
         
     def export(self, pack):
-        if pack.dst == -1:
+        if pack.dst == 'out':
             self.drain.put(pack)
-        if pack.dst == -2:
+        if pack.dst == 'rip':
             self.pack_pool.put(pack)
         else: 
             self.stream.put(pack)
