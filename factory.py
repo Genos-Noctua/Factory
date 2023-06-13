@@ -1,4 +1,4 @@
-#Factory 1.25
+#Factory 1.3
 import multiprocessing as mp
 import threading
 
@@ -32,7 +32,7 @@ class Factory:
     def export(self, pack):
         if pack.dst == 'out':
             self.drain.put(pack)
-        if pack.dst == 'rip':
+        elif pack.dst == 'rip':
             self.pack_pool.put(pack)
         else: 
             self.stream.put(pack)
