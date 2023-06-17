@@ -1,11 +1,10 @@
-#Factory 1.3
+#Factory 1.4
 import multiprocessing as mp
-import threading
+import threading, time
 
 class Package:
     def __init__(self):
         self.dst = 0
-        self.special = {}
         self.payload = {}
 
 class Factory:
@@ -24,8 +23,43 @@ class Factory:
         self.runner.daemon = True
         self.runner.start()
 
+    def map(self, elements, name, mode='each'):
+        if mode=='each':
+            ready=0
+            while len(elements) in range(len(elements), 1, -1):
+                y = 0
+                for _ in range(self.processes*2):
+                    if len(elements) == 0:
+                        break
+                    pack = self.get_pack()
+                    pack.payload = {name: elements.pop()}
+                    self.add(pack)
+                    y+=1
+                for _ in range(y):
+                    pack = self.take()
+                    self.ret_pack(pack)
+
+        elif mode=='batch':
+            ready=0
+            pros = self.processes
+            lists = [[] for _ in range(pros)]
+            for x in range(len(elements)):
+                lists[x % pros].append(elements[x])
+            for x in range(pros):
+                pack = self.get_pack()
+                pack.payload = {name: lists[x]}
+                self.add(pack)
+            while ready < pros:
+                pack = self.take()
+                self.ret_pack(pack)
+                ready+=1
+            del lists
+
     def run(self):
         while not self.stop_flag:
+            if self.stream.empty():
+                time.sleep(0.01)
+                continue
             pack = self.stream.get()
             self.pool.apply_async(self.tasks[pack.dst], args=(pack,), callback=self.export)
         
@@ -46,7 +80,6 @@ class Factory:
     def get_pack(self):
         x = self.pack_pool.get()
         x.dst = 0
-        x.special = {}
         x.payload = {}
         return x 
 
@@ -56,9 +89,9 @@ class Factory:
     def kill(self):
         self.stop_flag = True
         self.runner.join()
+        self.stream.close()
         self.pool.close()
         self.pool.join()
-        self.stream.close()
         self.drain.close()
         self.pack_pool.close()
 
@@ -69,22 +102,42 @@ import random
 
 def multiplier(package):
     for i in range(100000):
-        package.payload['mul'] = package.special['x'] * package.special['y']
+        package.payload['mul'] = package.payload['x'] * package.payload['y']
     package.dst = 1
     return package
 
 def summer(package):
     for i in range(100000):
-        package.payload['sum'] = package.special['x'] + package.special['y']
-    package.dst = -1
+        package.payload['sum'] = package.payload['x'] + package.payload['y']
+    package.dst = 'rip'
     return package
 
 if __name__ == '__main__':
-    factory = Factory((multiplier, summer), processes=4, pressure=10)
+    factory = Factory((multiplier, summer), processes=4)
     for x in range(100):
         pack = factory.get_pack()
-        pack.special = {'x': random.randint(1, 10), 'y': random.randint(1, 10), 'z': random.randint(1, 10)}
+        pack.payload = {'x': random.randint(1, 10), 'y': random.randint(1, 10), 'z': random.randint(1, 10)}
         factory.add(pack)
     factory.kill()
     del factory, pack, x
+'''
+
+'''
+from factory import *
+
+def lol(package):
+    if not isinstance(package.payload['x'], list):
+        package.payload['x'] = [package.payload['x'],]
+    for x in package.payload['x']:
+        print(x)
+        
+    package.dst = 'out'
+    return package
+
+if __name__ == '__main__':
+    factory = Factory((lol, ), processes=8, pressure=10)
+    factory.map(list(range(10)), 'x', 'each')
+    factory.map(list(range(10)), 'x', 'batch')
+    factory.kill()
+    del factory
 '''
