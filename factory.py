@@ -25,7 +25,6 @@ class Factory:
 
     def map(self, elements, name, mode='each'):
         if mode=='each':
-            ready=0
             while len(elements) > 0:
                 y = 0
                 for _ in range(self.processes*2):
