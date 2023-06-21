@@ -67,7 +67,12 @@ class Factory:
         if isinstance(num, list): num = len(num)
         return [self.get_pack() for _ in range(num)]
 
-    def ret_pack(self, pack): self.pack_pool.put(pack)
+    def ret_pack(self, pack): 
+        if isinstance(pack, list):
+            for x in pack:
+                self.pack_pool.put(x)
+            return
+        self.pack_pool.put(pack)
 
     def kill(self):
         self.stop_flag = True
