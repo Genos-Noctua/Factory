@@ -1,4 +1,4 @@
-#Factory 1.5
+#Factory 1.6
 import multiprocessing as mp
 import threading, time
 
@@ -15,9 +15,6 @@ class Factory:
         self.stop_flag = False
         self.stream = mp.Queue(maxsize=pressure)
         self.drain = mp.Queue()
-        self.pack_pool = mp.Queue(maxsize=100000)
-        for x in range(100):
-            self.pack_pool.put(Package())
         self.pool = mp.Pool(processes=self.processes)
         self.runner = threading.Thread(target=self.run, args = ())
         self.runner.daemon = True
@@ -44,7 +41,7 @@ class Factory:
         if pack.dst == 'out':
             self.drain.put(pack)
         elif pack.dst == 'rip':
-            self.pack_pool.put(pack)
+            del pack
         else: 
             self.stream.put(pack)
 
@@ -58,7 +55,7 @@ class Factory:
     def take(self): return self.drain.get()
 
     def get_pack(self):
-        x = self.pack_pool.get()
+        x = Package()
         x.dst = 0
         x.payload = {}
         return x 
@@ -67,13 +64,6 @@ class Factory:
         if isinstance(num, list): num = len(num)
         return [self.get_pack() for _ in range(num)]
 
-    def ret_pack(self, pack): 
-        if isinstance(pack, list):
-            for x in pack:
-                self.pack_pool.put(x)
-            return
-        self.pack_pool.put(pack)
-
     def kill(self):
         self.stop_flag = True
         self.runner.join()
@@ -81,7 +71,6 @@ class Factory:
         self.pool.close()
         self.pool.join()
         self.drain.close()
-        self.pack_pool.close()
 
 
 '''
