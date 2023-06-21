@@ -48,7 +48,12 @@ class Factory:
         else: 
             self.stream.put(pack)
 
-    def add(self, pack): self.stream.put(pack)
+    def add(self, pack): 
+        if isinstance(pack, list):
+            for x in pack:
+                self.stream.put(x)
+            return
+        self.stream.put(pack)
 
     def take(self): return self.drain.get()
 
