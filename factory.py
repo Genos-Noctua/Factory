@@ -1,4 +1,4 @@
-#Factory 1.4
+#Factory 1.5
 import multiprocessing as mp
 import threading, time
 
@@ -15,7 +15,7 @@ class Factory:
         self.stop_flag = False
         self.stream = mp.Queue(maxsize=pressure)
         self.drain = mp.Queue()
-        self.pack_pool = mp.Queue(maxsize=100)
+        self.pack_pool = mp.Queue(maxsize=100000)
         for x in range(100):
             self.pack_pool.put(Package())
         self.pool = mp.Pool(processes=self.processes)
@@ -23,36 +23,14 @@ class Factory:
         self.runner.daemon = True
         self.runner.start()
 
-    def map(self, elements, name, mode='each'):
-        if mode=='each':
-            while len(elements) > 0:
-                y = 0
-                for _ in range(self.processes*2):
-                    if len(elements) == 0:
-                        break
-                    pack = self.get_pack()
-                    pack.payload = {name: elements.pop()}
-                    self.add(pack)
-                    y+=1
-                for _ in range(y):
-                    pack = self.take()
-                    self.ret_pack(pack)
-
-        elif mode=='batch':
-            ready=0
-            pros = self.processes
-            lists = [[] for _ in range(pros)]
-            for x in range(len(elements)):
-                lists[x % pros].append(elements[x])
-            for x in range(pros):
-                pack = self.get_pack()
-                pack.payload = {name: lists[x]}
-                self.add(pack)
-            while ready < pros:
-                pack = self.take()
-                self.ret_pack(pack)
-                ready+=1
-            del lists
+    def map(self, packs):
+        y = len(packs)
+        for pack in packs:
+            self.add(pack)
+        packs = list()
+        for _ in range(y):
+            packs.append(self.take())
+        return packs
 
     def run(self):
         while not self.stop_flag:
@@ -70,11 +48,9 @@ class Factory:
         else: 
             self.stream.put(pack)
 
-    def add(self, pack):
-        self.stream.put(pack)
+    def add(self, pack): self.stream.put(pack)
 
-    def take(self):
-        return self.drain.get()
+    def take(self): return self.drain.get()
 
     def get_pack(self):
         x = self.pack_pool.get()
@@ -82,8 +58,9 @@ class Factory:
         x.payload = {}
         return x 
 
-    def ret_pack(self, pack):
-        self.pack_pool.put(pack)
+    def get_packs(self, num): return [self.get_pack() for _ in range(num)]
+
+    def ret_pack(self, pack): self.pack_pool.put(pack)
 
     def kill(self):
         self.stop_flag = True
