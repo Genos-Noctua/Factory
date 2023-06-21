@@ -58,7 +58,9 @@ class Factory:
         x.payload = {}
         return x 
 
-    def get_packs(self, num): return [self.get_pack() for _ in range(num)]
+    def get_packs(self, num): 
+        if isinstance(num, list): num = len(num)
+        return [self.get_pack() for _ in range(num)]
 
     def ret_pack(self, pack): self.pack_pool.put(pack)
 
