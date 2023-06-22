@@ -1,6 +1,6 @@
 #Factory 1.6
 import multiprocessing as mp
-import threading, time
+import threading, time, tqdm
 
 class Package:
     def __init__(self):
@@ -20,12 +20,12 @@ class Factory:
         self.runner.daemon = True
         self.runner.start()
 
-    def map(self, packs):
+    def map(self, packs, verbal = False):
         y = len(packs)
         for pack in packs:
             self.add(pack)
-        packs = list()
-        for _ in range(y):
+        packs.clear()
+        for _ in tqdm.tqdm(range(y), smoothing=0, desc='', disable=not verbal):
             packs.append(self.take())
         return packs
 
