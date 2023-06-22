@@ -1,6 +1,7 @@
 #Factory 1.6
 import multiprocessing as mp
-import threading, time, tqdm
+import threading, time
+from tqdm import tqdm
 
 class Package:
     def __init__(self):
@@ -25,7 +26,7 @@ class Factory:
         for pack in packs:
             self.add(pack)
         packs.clear()
-        for _ in tqdm.tqdm(range(y), smoothing=0, desc='', disable=not verbal):
+        for _ in tqdm(range(y), smoothing=0, desc='', disable=not verbal):
             packs.append(self.take())
         return packs
 
