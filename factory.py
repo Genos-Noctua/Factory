@@ -9,12 +9,11 @@ class Package:
         self.payload = {}
 
 class Factory:
-    def __init__(self, tasks, pressure=100, processes=mp.cpu_count()):
+    def __init__(self, tasks, processes=mp.cpu_count()):
         self.tasks = tasks
-        self.pressure = pressure
         self.processes = processes
         self.stop_flag = False
-        self.stream = mp.Queue(maxsize=pressure)
+        self.stream = mp.Queue()
         self.drain = mp.Queue()
         self.pool = mp.Pool(processes=self.processes)
         self.runner = threading.Thread(target=self.run, args = ())
