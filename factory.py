@@ -54,7 +54,7 @@ class Factory:
 
     def take(self): return self.drain.get()
 
-    def get_pack(self):
+    def get_pack():
         x = Package()
         x.dst = 0
         x.payload = {}
