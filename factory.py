@@ -62,7 +62,7 @@ class Factory:
 
     def get_packs(self, num): 
         if isinstance(num, list): num = len(num)
-        return [self.get_pack() for _ in range(num)]
+        return [Factory.get_pack() for _ in range(num)]
 
     def kill(self):
         self.stop_flag = True
