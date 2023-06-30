@@ -60,7 +60,7 @@ class Factory:
         x.payload = {}
         return x 
 
-    def get_packs(self, num): 
+    def get_packs(num):
         if isinstance(num, list): num = len(num)
         return [Factory.get_pack() for _ in range(num)]
 
