@@ -11,15 +11,22 @@ class Package:
 class Factory:
     def __init__(self, tasks, processes=mp.cpu_count()):
         self.tasks = tasks
-        self.processes = processes
         self.stop_flag = False
         self.stream = mp.Queue()
         self.drain = mp.Queue()
-        self.pool = mp.Pool(processes=self.processes)
+        self.pool = mp.Pool(processes=processes)
         self.runner = threading.Thread(target=self.run, args = ())
         self.runner.daemon = True
         self.runner.start()
 
+    def run(self):
+        while not self.stop_flag:
+            if self.stream.empty():
+                time.sleep(0.1)
+                continue
+            pack = self.stream.get()
+            self.pool.apply_async(self.tasks[pack.dst], args=(pack,), callback=self.export)
+        
     def map(self, packs, verbal = False):
         y = len(packs)
         for pack in packs:
@@ -29,14 +36,6 @@ class Factory:
             packs.append(self.take())
         return packs
 
-    def run(self):
-        while not self.stop_flag:
-            if self.stream.empty():
-                time.sleep(0.01)
-                continue
-            pack = self.stream.get()
-            self.pool.apply_async(self.tasks[pack.dst], args=(pack,), callback=self.export)
-        
     def export(self, pack):
         if pack.dst == 'out':
             self.drain.put(pack)
