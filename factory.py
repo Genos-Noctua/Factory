@@ -6,7 +6,7 @@ from tqdm import tqdm
 class Package:
     def __init__(self):
         self.dst = 0
-        self.payload = {}
+        self.con = {}
 
 class Factory:
     def __init__(self, tasks, processes=mp.cpu_count()):
@@ -57,7 +57,7 @@ class Factory:
     def get_pack():
         x = Package()
         x.dst = 0
-        x.payload = {}
+        x.con = {}
         return x 
 
     def get_packs(num):
