@@ -27,12 +27,12 @@ class Factory:
             pack = self.stream.get()
             self.pool.apply_async(self.tasks[pack.dst], args=(pack,), callback=self.export)
         
-    def map(self, packs, verbal = False):
+    def map(self, packs, verbal = False, desc = 'Mapping...'):
         y = len(packs)
         for pack in packs:
             self.add(pack)
         packs.clear()
-        for _ in tqdm(range(y), smoothing=0, desc='', disable=not verbal):
+        for _ in tqdm(range(y), smoothing=0, desc=desc, disable=not verbal):
             packs.append(self.take())
         return packs
 
