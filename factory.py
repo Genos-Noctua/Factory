@@ -29,6 +29,8 @@ class Factory:
         
     def map(self, packs, verbal = False, desc = 'Mapping...'):
         y = len(packs)
+        if y == 0:
+            return packs
         for pack in packs:
             self.add(pack)
         packs.clear()
