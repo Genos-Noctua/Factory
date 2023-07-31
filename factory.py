@@ -9,7 +9,7 @@ class Package:
         self.con = {}
 
 class Factory:
-    def __init__(self, tasks, processes=mp.cpu_count()):
+    def __init__(self, tasks, processes=mp.cpu_count()+1):
         self.tasks = tasks
         self.stop_flag = False
         self.stream = mp.Queue()
