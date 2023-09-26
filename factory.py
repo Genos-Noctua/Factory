@@ -9,7 +9,7 @@ class Package:
         self.con = {}
 
 class Factory:
-    def __init__(self, tasks, processes=mp.cpu_count()+1):
+    def __init__(self, tasks, processes=mp.cpu_count()):
         self.tasks = tasks
         self.stop_flag = False
         self.stream = mp.Queue()
@@ -55,15 +55,9 @@ class Factory:
 
     def take(self): return self.drain.get()
 
-    def get_pack():
-        x = Package()
-        x.dst = 0
-        x.con = {}
-        return x 
-
     def get_packs(num):
         if isinstance(num, list): num = len(num)
-        return [Factory.get_pack() for _ in range(num)]
+        return [Package() for _ in range(num)]
 
     def kill(self):
         self.stop_flag = True
@@ -93,7 +87,7 @@ def summer(package):
 if __name__ == '__main__':
     factory = Factory((multiplier, summer), processes=4)
     for x in range(100):
-        pack = factory.get_pack()
+        pack = Package()
         pack.payload = {'x': random.randint(1, 10), 'y': random.randint(1, 10), 'z': random.randint(1, 10)}
         factory.add(pack)
     factory.kill()
