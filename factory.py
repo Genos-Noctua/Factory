@@ -107,7 +107,7 @@ def lol(package):
     return package
 
 if __name__ == '__main__':
-    factory = Factory((lol, ), processes=8, pressure=10)
+    factory = Factory((lol, ), processes=8)
     factory.map(list(range(10)), 'x', 'each')
     factory.map(list(range(10)), 'x', 'batch')
     factory.kill()
