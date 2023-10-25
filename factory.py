@@ -93,23 +93,3 @@ if __name__ == '__main__':
     factory.kill()
     del factory, pack, x
 '''
-
-'''
-from factory import *
-
-def lol(package):
-    if not isinstance(package.payload['x'], list):
-        package.payload['x'] = [package.payload['x'],]
-    for x in package.payload['x']:
-        print(x)
-        
-    package.dst = 'out'
-    return package
-
-if __name__ == '__main__':
-    factory = Factory((lol, ), processes=8)
-    factory.map(list(range(10)), 'x', 'each')
-    factory.map(list(range(10)), 'x', 'batch')
-    factory.kill()
-    del factory
-'''
